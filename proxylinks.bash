@@ -7,7 +7,6 @@ SHELL="zsh"
 PORT=1337
 HOST="localhost"
 
-#TODO understand why do they need to start with 1
 variables=("port" "host")
 PORT_IDX=0
 HOST_IDX=1
@@ -55,32 +54,27 @@ function isServerUp() {
 }
 #
 function knowCurrIpLocation() {
+	userWantsCycle=$([[ "$1" == "y" || "$1" == "Y" ]] && echo true || echo false)
+
 	URL_GEO_IP_API="http://ip-api.com/json/"
 	DOMAIN_GEO_IP_API="ip-api.com"
 	numPackets=1
 
 	if isServerUp DOMAIN_GEO_IP_API numPackets; then # sent it this way just to practice indirect variable expansion
-
-		country=$(curl -s "http://ip-api.com/json/" | jq -r '.country')
-		echo "$country"
-		exit 0
-
-
 		jsonContent=$(curl -s "$URL_GEO_IP_API")
-		echo $jsonContent
-		exit 0
-
-		country=$(echo "$jsonContent" | jq -r '.country') # -r for rawOutput (without double quotes)
-        region=$(echo "$jsonContent" | jq -r '.regionName')
-		echo "Location: $country, $region"
-		exit 0
+		country=$(echo "$jsonContent" | jq -r '.country')
+		region=$(echo "$jsonContent" | jq -r '.regionName')
+		echo "Location: $region, $country"
 	else
 		echo "Server down. Unable to know IP location."
 	fi
 
-	exit 0
+	# Get the location again in 60 seconds
+	if [[ userWantsCycle ]]; then
+		sleep 60
+		knowCurrIpLocation "y" & # keep running in the background
+	fi
 }
-
 #
 function setProxy() {
 	# In case the proxy settings are in "Disabled mode"
@@ -90,14 +84,14 @@ function setProxy() {
 	gsettings set org.gnome.system.proxy.socks ${variables[$PORT_IDX]} $PORT # 1337 (default)
 	gsettings set org.gnome.system.proxy.socks ${variables[$HOST_IDX]} $HOST # localhost (default)
 
+	#TODO use a file instead of the ssh command that was here
 	createTerminalTab ""
 }
 #
 function verifyCurrState() {
 	printf "Verifying... \n"
-
 	for property in "${variables[@]}"; do
-    	gsettings get org.gnome.system.proxy.socks "$property"
+    	echo " $property = $(gsettings get org.gnome.system.proxy.socks "$property")"
 	done
 }
 #
@@ -118,10 +112,8 @@ function resetProxySettings() {
 			echo "Did NOT reset the proxy settings."
 		fi
 	fi
-	
-	exit 0
 }
-#
+
 function outputCuriosity() {
 	echo "The term \"proxy\" originated from the Latin word \"proximus,\" meaning \"next." 
 }
@@ -156,6 +148,10 @@ function userActions() {
 		"^L" | "--clear")
 			clearTerminal
 			;;
+		"l" | "--location")
+			read -p "Do you want to have a cyclic verification? [y / n] " userResponse
+			knowCurrIpLocation userResponse
+			;;
 		*)	
 			echo "Invalid flag. Please, try again."
 			;;
@@ -173,7 +169,7 @@ while true; do
 		clearTerminal
     else
         userActions "$user_input"
-		user_input="" # empty the variable
+		unset user_input
     fi
 done
 
