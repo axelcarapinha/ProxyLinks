@@ -1,2 +1,2 @@
 # ProxyLinks
-Simple bash script to use a server as a proxy.
+Bash script to use a server as a proxy.
