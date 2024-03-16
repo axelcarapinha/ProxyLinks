@@ -43,6 +43,13 @@ sudo docker buildx build \
     --load
 
 #
+# To save the image to a .tar file
+#
+# docker save -o proxylinks-container-image.tar proxylinks-container-image
+# exit 0
+
+
+#
 # Building and runnning Proxylinks' container
 #
 avoid_repeated_builds "proxylinks-container"
@@ -52,12 +59,6 @@ sudo docker run \
     -it \
     -v "$PATH_TO_SSH_KEY":/root/.ssh proxylinks-container-image \
     bash main.bash
-    # /bin/bash
-
-#
-# Setup last details
-#
-# sudo docker exec -it proxylinks-container /bin/bash
 
 
 

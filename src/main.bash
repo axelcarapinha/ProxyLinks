@@ -23,7 +23,7 @@ source handlers/error_handler.bash
 #   $1: the pretended command (invalid or not)
 #
 # Returns:
-#   Nothing
+#   boolean (to terminate the execution when the user wants to)
 #
 # Usage:
 #   user_actions --set
@@ -53,14 +53,14 @@ function user_actions() {
 			know_curr_ip_location 
 			;;
 		"e" | "--exit")
-			return 1
+			# return 1
 			;;
 		*)	
 			echo "Invalid flag. Please, try again."
 			;;
 	esac
 
-	return 0
+	# return 0
 }
 
 #
@@ -79,12 +79,9 @@ function main() {
 	if [[ -z $user_input ]]; then
 		echo "Enter '-h' if you want to know the available commands"
 	fi
-
 	#
-	# Cyclic prompt
-	#
-	local user_wants_continue=0
-	# while [[ $user_wants_continue -eq 1 ]]; do
+	# user_wants_continue=0
+	# while [[ $user_wants_continue -eq 0 ]]; do
 	while true; do
 		if [[ -z $user_input ]]; then
 			read -p "command:  " user_input  
@@ -96,6 +93,7 @@ function main() {
 			fi
 		else
 			# user_wants_continue=$(user_actions "$user_input")
+			# echo "$user_wants_continue"
 			user_actions "$user_input"
 			unset user_input
 		fi
