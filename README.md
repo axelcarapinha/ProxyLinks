@@ -25,13 +25,18 @@ Bash script to use a server as a proxy.
 A bash script done for learning purposes that eases the connection to a server as a proxy on Linux systems, avoiding the manual management of system settings. Allows to know the current location based on IP automatically, and aims to help with proxychains too.
 
 With it I've learned more about:
-* Basic bash concepts (loops, conditionals, ...)
-* Variable expansion
-* Bash parallel processing
+* Bash
+  * Basic concepts (loops, conditionals, ...)
+  * Variable expansion
+  * Bash parallel processing
+* General
   * Background processes
-  * External utilities (parallel)
-* Docker (runc Daemon and runtimes, images, buildx, registries, ...)
-* 
+* Docker
+  * runc Daemon and runtimes
+  * images
+  * buildx
+  * registries
+  * SSH agents and mounting volumes at runtime
 
 <!-- HOW TO START IT -->
 ## Getting started
