@@ -4,6 +4,9 @@ FROM ubuntu:latest
 # (that could appear due to interactive limitations of it)
 ENV DEBIAN_FRONTEND=noninteractive
 
+# Update the package lists
+RUN apt-get update
+
 # Install dependencies
 RUN apt-get update && \
     apt-get install -y \
@@ -14,14 +17,22 @@ RUN apt-get update && \
     gsettings-desktop-schemas \
     openssh-client \
     openssh-server \
-    install xterm
-
-#TODO pull from this script, to be able to work with it directly
-#TODO automate the build of an alias
+    xterm
 
 RUN systemctl enable ssh
 
 RUN apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-CMD ["/bin/bash"]
+
+
+WORKDIR /app
+COPY src /app/proxylinks/src
+
+# Give permissions to all .bash files and start the script execution
+RUN cd /app/proxylinks/src && \
+    find -type f -name "*.bash" -exec chmod 755 {} +
+
+
+# Startin command
+# CMD ["cd proxylinks/src/ && bash main.bash"]

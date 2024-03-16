@@ -67,7 +67,7 @@ function show_proxy_settings() {
 #
 function create_terminal_tab() {
 	x-terminal-emulator \
-		--name "ProxyLinks CLI" \
+		--display "ProxyLinks CLI" \
 		--title "ProxyLink - happy coding ;)" \
 		--start-as normal \
 		--hold \
@@ -131,7 +131,7 @@ function reset_proxy_settings() {
         exec_reset
     else 
         read -p "Are you sure? [y/n] " answer
-        if [[ "$answer" =~ -[yY] ]]; then    
+        if [[ "$answer" =~ [yY] ]]; then    
             exec_reset
         else
             echo "Did NOT reset the proxy settings."
