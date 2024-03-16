@@ -22,7 +22,8 @@ HOST_IDX=1
 #   check_if_in_docker_container
 #
 function check_if_in_docker_container() {
-	if grep -q '/docker/' /proc/1/cgroup || grep -q '/kubepods/' /proc/1/cgroup; then
+	if ls -a / | grep -q ".dockerenv"; then
+		echo "Choosing container options..."
     	return 0
 	fi
 	return 1
@@ -141,13 +142,15 @@ function set_proxy() {
 	if check_if_in_docker_container; then
 		export HTTP_PROXY=socks5://"$HOST":"$PORT"
 		export HTTPS_PROXY=socks5://"$HOST":"$PORT"
+		#
+		create_terminal_tab "ssh -i /root/.ssh/"$SSH_KEY_FILENAME" "$SERVER_USERNAME"@"$SERVER_IP"" 
 	else 
 		gsettings set org.gnome.system.proxy mode 'manual';
 		gsettings set org.gnome.system.proxy.socks ${variables[$PORT_IDX]} $PORT # 1337 (default)
 		gsettings set org.gnome.system.proxy.socks ${variables[$HOST_IDX]} $HOST # localhost (default)
+		#
+		create_terminal_tab "ssh -i $PATH_TO_SSH_KEY "$SERVER_USERNAME"@"$SERVER_IP"" 
 	fi 
-
-	create_terminal_tab "ssh -i $PATH_TO_SSH_KEY "$SERVER_USERNAME"@"$SERVER_IP"" 
 }
 
 

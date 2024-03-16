@@ -33,7 +33,7 @@ COPY src ./
 RUN cd /app/proxylinks/src && \
     find -type f -name "*.bash" -exec chmod 755 {} +
 
-CMD ["bash", "bash main.bash"]
+CMD ["bash", "main.bash"]
 
 # COPY docker_init.bash home/asusftr/Desktop/here/ProxyLinks/docker_init.bash
 # RUN chmod +x home/asusftr/Desktop/here/ProxyLinks/docker_init.bash

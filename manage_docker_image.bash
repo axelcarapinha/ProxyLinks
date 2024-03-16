@@ -24,7 +24,8 @@ function avoid_repeated_builds() {
         printf "Remove it and build a new one with Proxylinks? (y/n): "
         read answer
         if [[ "$answer" =~ [yY] ]]; then
-            echo "Removed '$(sudo docker stop "$TARGET_CONTAINER" && sudo docker rm -f "$TARGET_CONTAINER")'"
+            sudo docker stop "$TARGET_CONTAINER"
+            echo "Removed '$(sudo docker rm -f "$TARGET_CONTAINER")'"
         fi
     fi
 }
@@ -50,14 +51,13 @@ sudo docker run \
     --name proxylinks-container \
     -it \
     -v "$PATH_TO_SSH_KEY":/root/.ssh proxylinks-container-image \
-#
-echo "proxylinks-container up and running..."
+    bash main.bash
+    # /bin/bash
 
 #
 # Setup last details
 #
-# sudo docker exec -it proxylinks-container \
-#      \
+# sudo docker exec -it proxylinks-container /bin/bash
 
 
 
