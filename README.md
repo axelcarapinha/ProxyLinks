@@ -62,10 +62,6 @@ sudo apt install bash # example for ubuntu
 `chmod +x main.bash`
 
 ## Results
-### Starting image
-![Starting image](https://raw.githubusercontent.com/axelcarapinha/Assembly-Character-Identifier/main/images/original.png)
-
-
 
 
 
