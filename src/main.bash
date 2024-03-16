@@ -12,12 +12,6 @@ source handlers/response_handler.bash
 #
 source handlers/error_handler.bash
 
-#
-# Global variables
-#
-variables=("port" "host")
-PORT_IDX=0
-HOST_IDX=1
 
 # Function: user_actions
 #
@@ -38,7 +32,7 @@ function user_actions() {
 	FLAG=$1
 	case "$FLAG" in 
 		"-s" | "-S" | "--set")
-			set_proxy
+			set_proxy "$VISUAL_MODE" #TODO check this
 			;;
 		"-v" | "-V" | "--verify")
 			show_proxy_settings #TODO verify if in a container the errors still occur

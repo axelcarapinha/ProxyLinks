@@ -1,3 +1,34 @@
+#
+# Global variables
+#
+variables=("port" "host")
+PORT_IDX=0
+HOST_IDX=1
+
+
+# Function: check_if_in_docker_container
+#
+# Description:
+#   Checks if the client is in a docker container 
+#	to adapt accordingly
+#
+# Parameters:
+#   None
+#
+# Returns:
+#   boolean (true if is a container, false otherwise)
+#
+# Usage:
+#   check_if_in_docker_container
+#
+function check_if_in_docker_container() {
+	if grep -q '/docker/' /proc/1/cgroup || grep -q '/kubepods/' /proc/1/cgroup; then
+    	return 0
+	fi
+	return 1
+}
+
+
 # Function: is_server_up
 #
 # Description:
@@ -16,8 +47,8 @@
 function is_server_up() {
     local server_is_up=1
 
-	local target="${!1}" # indirect variable expansion needed
-	local NUM_PACKETS="${!2}"
+	local target="$1"
+	local NUM_PACKETS="$2"
 
 	if ping -c $NUM_PACKETS "$target" &> /dev/null; then
     	server_is_up=0
@@ -43,9 +74,14 @@ function is_server_up() {
 #
 function show_proxy_settings() {
 	printf "Verifying... \n"
-	for property in "${variables[@]}"; do
-    	echo " $property = $(gsettings get org.gnome.system.proxy.socks "$property")"
-	done
+	if check_if_in_docker_container; then
+		echo HTTP_PROXY=socks5://"$HOST":"$PORT"
+		echo HTTPS_PROXY=socks5://"$HOST":"$PORT"
+	else 
+		for property in "${variables[@]}"; do
+			echo " $property = $(gsettings get org.gnome.system.proxy.socks "$property")"
+		done
+	fi 
 }
 
 
@@ -66,13 +102,18 @@ function show_proxy_settings() {
 #   create_terminal_tab
 #
 function create_terminal_tab() {
-	x-terminal-emulator \
-		--display "ProxyLinks CLI" \
-		--title "ProxyLink - happy coding ;)" \
-		--start-as normal \
-		--hold \
-		-- sh \
-		-c "$1" 
+	local connection_command="$1"
+	
+	if check_if_in_docker_container; then
+		eval "$connection_command"
+	else 
+		x-terminal-emulator \
+			--title "ProxyLink - happy coding ;)" \
+			--start-as normal \
+			--hold \
+			-- sh \
+			-c "$connection_command"
+	fi 
 }
 
 
@@ -84,23 +125,29 @@ function create_terminal_tab() {
 #   considering the .conf file
 #
 # Parameters:
-#   None
+#   $1: variable indicating if the user wants to create a 
+#	new terminal window when executing the script	
 #
 # Returns:
-#   Nothing
+#   $1
 #
 # Usage:
 #   set_proxy
 #
 function set_proxy() {
-	# In case the proxy settings are in "Disabled mode"
-	gsettings set org.gnome.system.proxy mode 'manual';
-
+	# In case the proxy settings are off
 	printf "Setting... \n"
-	gsettings set org.gnome.system.proxy.socks ${variables[$PORT_IDX]} $PORT # 1337 (default)
-	gsettings set org.gnome.system.proxy.socks ${variables[$HOST_IDX]} $HOST # localhost (default)
 
-	create_terminal_tab "ssh -i \"~/Desktop/Link\ to\ (1.0)\ Coding/1MAGIC/0Server\" "$SERVER_USERNAME"@"$SERVER_IP"; exec zsh"
+	if check_if_in_docker_container; then
+		export HTTP_PROXY=socks5://"$HOST":"$PORT"
+		export HTTPS_PROXY=socks5://"$HOST":"$PORT"
+	else 
+		gsettings set org.gnome.system.proxy mode 'manual';
+		gsettings set org.gnome.system.proxy.socks ${variables[$PORT_IDX]} $PORT # 1337 (default)
+		gsettings set org.gnome.system.proxy.socks ${variables[$HOST_IDX]} $HOST # localhost (default)
+	fi 
+
+	create_terminal_tab "ssh -i $PATH_TO_SSH_KEY "$SERVER_USERNAME"@"$SERVER_IP"" 
 }
 
 
@@ -120,13 +167,17 @@ function set_proxy() {
 #   reset_proxy_settings
 #
 function reset_proxy_settings() {
-    local user_wants_reset=${1:-"-n"} # default answer
-
-    exec_reset() { 
+	exec_reset() { 
         echo "Resetting proxy settings..."
-        gsettings set org.gnome.system.proxy mode 'none'; 
+		if check_if_in_docker_container; then
+			unset HTTP_PROXY
+			unset HTTPS_PROXY
+		else 
+        	gsettings set org.gnome.system.proxy mode 'none'; 
+		fi 
     }
 
+	local user_wants_reset=${1:-"-n"} # default answer
     if [[ "$user_wants_reset" =~ -[yY] ]]; then
         exec_reset
     else 
@@ -154,20 +205,20 @@ function reset_proxy_settings() {
 #   Nothing (std out)
 #
 # Usage:
-#   know_curr_ip_location -y
+#   know_curr_ip_location "-y"
 #
 function know_curr_ip_location() {
     local user_response 
 
 	read -p "Do you want to have a cyclic verification? [y / n] " user_response
 
-	local userWantsCycle=$([[ "$user_response" =~ "-[yY]" ]] && echo true || echo false)
+	local user_wants_cycle=$([[ "$user_response" =~ [yY] || "$1" =~ -[yY] ]] && echo true || echo false)
 
 	local readonly URL_GEO_IP_API="http://ip-api.com/json/"
 	local readonly DOMAIN_GEO_IP_API="ip-api.com"
 	local readonly NUM_PACKETS=1
 
-	if is_server_up DOMAIN_GEO_IP_API NUM_PACKETS; then # sent it this way just to practice indirect variable expansion
+	if is_server_up $DOMAIN_GEO_IP_API $NUM_PACKETS; then
 		local jsonContent=$(curl -s "$URL_GEO_IP_API")
 		local country=$(echo "$jsonContent" | jq -r '.country')
 		local region=$( echo "$jsonContent" | jq -r '.regionName')
@@ -176,11 +227,11 @@ function know_curr_ip_location() {
 		echo "Server down. Unable to know IP location."
 	fi
 
-	# Get the location again in 60 seconds
-	if [[ userWantsCycle ]]; then
-		sleep 60
-		know_curr_ip_location "-y" & # keep running in the background
-	fi
+	# Get the location again in 60 seconds if user wants cyclic verification
+    if [[ "$user_wants_cycle" == "true" ]]; then
+        sleep 60
+        know_curr_ip_location "-y" & # keep running in the background
+    fi
 }
 
 
