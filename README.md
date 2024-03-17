@@ -23,7 +23,7 @@ Bash script to use a server as a proxy.
 
 <!-- ABOUT THE PROJECT -->
 ## About the project
-A bash script done for <u>learning purposes</u> that eases the connection to a server as a proxy on Linux systems, avoiding the manual management of system settings. Allows to know the current location based on IP automatically, and aims to help with proxychains too.
+A bash script done for _learning purposes_ that eases the connection to a server as a proxy on Linux systems, avoiding the manual management of system settings. Allows to know the current location based on IP automatically, and aims to help with proxychains too.
 
 <!-- HOW TO START IT -->
 ## Getting started
@@ -37,8 +37,7 @@ docker buildx version # to check the installation
 sudo apt update
 sudo apt install docker-buildx # if it was not installed (example for ubuntu)
 ```
-3. Bash
-If bash does not come pre-installed, use your predefined package-manager to install it
+3. If bash does not come pre-installed, use your predefined package-manager to install it
 ```sh
 sudo apt install bash # example for ubuntu
 ```
@@ -56,7 +55,7 @@ sudo apt install bash # example for ubuntu
 chmod +x manage_docker_image.bash
 bash manage_docker_image.bash
 ```
-TODO: upload a docker image to dockerhub for an easier setup
+Sidenote: I aim to upload a docker image to dockerhub for an easier setup
 
 ## Results
 
