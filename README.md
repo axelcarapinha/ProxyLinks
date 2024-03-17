@@ -42,12 +42,7 @@ sudo apt install docker-buildx # if it was not installed (example for ubuntu)
 sudo apt install bash # example for ubuntu
 ```
 
-### Installation
-1. Pull the code and enter the folder
-2. `chmod +x install.bash`
-3. `bash install.bash`
-
-## Usage
+### Installation and usage
 1. Pull the code, and enter _Proxylinks_ folder
 2. Enter the docker folder `cd docker` and config the .conf file accordingly
 3. Create an image based on the Dockerfile
