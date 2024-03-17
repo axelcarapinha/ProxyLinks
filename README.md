@@ -12,6 +12,7 @@ Bash script to use a server as a proxy.
       <a href="#getting-started">Getting Started</a>
       <ul>
         <li><a href="#prerequisites">Prerequisites</a></li>
+        <li><a href="#installation">Prerequisites</a></li>
       </ul>
     </li>
     <li><a href="#usage">Usage</a></li>
@@ -22,7 +23,7 @@ Bash script to use a server as a proxy.
 
 <!-- ABOUT THE PROJECT -->
 ## About the project
-A bash script done for learning purposes that eases the connection to a server as a proxy on Linux systems, avoiding the manual management of system settings. Allows to know the current location based on IP automatically, and aims to help with proxychains too.
+A bash script done for learning purposes that <u>eases the connection to a server</u> as a proxy on Linux systems, avoiding the manual management of system settings. Allows to know the current location based on IP automatically, and aims to help with proxychains too.
 
 With it I've learned more about:
 * Bash
