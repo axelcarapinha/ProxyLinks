@@ -1,14 +1,15 @@
 #!/bin/bash
 # Creates a container to use ProxyLinks
 
-source ../src/configs/config.conf
+source configs/config.conf
+source src/utils_general
 
 #######################################
 # Avoids reusing names of containers
 # during the build process of the image
 #
 # Globals:
-#   None
+#   VERBOSE (flag for the verbose mode)
 # Arguments:
 #   $1: name of the container that Proxylinks
 #   pretends to build with Docker
@@ -17,41 +18,50 @@ source ../src/configs/config.conf
 #   interface to solve the problem otherwise
 #######################################
 function avoid_repeated_builds() {
-    local TARGET_CONTAINER="$1"
-    if sudo docker ps -a | grep "$TARGET_CONTAINER"; then
+    local readonly TARGET_CONTAINER="$1"
+    if sudo docker buildx ls | grep -q "$TARGET_CONTAINER"; then
         echo "There's already a container with that name"
-        printf "Remove it and build a new one with Proxylinks? (y/n): "
-        read answer
+        read -p "Remove it and build a new one with Proxylinks? (y/n): " answer
         if [[ "$answer" =~ [yY] ]]; then
-            sudo docker stop "$TARGET_CONTAINER"
-            echo "Removed '$(sudo docker rm -f "$TARGET_CONTAINER")'"
+            sudo docker buildx stop "$TARGET_CONTAINER"
+            sudo docker buildx rm -f "$TARGET_CONTAINER"
         fi
     fi
 }
 
-# Create the builder container
-avoid_repeated_builds "proxylinks-builder"
-sudo docker buildx create --name proxylinks-builder
-sudo docker buildx use proxylinks-builder
-sudo docker buildx build \
-    --builder proxylinks-builder \
-    -t proxylinks-container-image \
-    -f Dockerfile . \
-    --load
 
-# Save the image to a .tar file
-# docker save -o proxylinks-container-image.tar proxylinks-container-image
-# exit 0
-
-# Build and run Proxylinks' container
-avoid_repeated_builds "proxylinks-container"
+#TODO######################################
+# Checks the existence of the secret
+# before passing to Docker compose
 #
-cat "$SSH_PRIVATE_KEY_PATH" | docker secret create ssh_key -
-sudo docker run \
-    --name proxylinks-container \
-    -it \
-    --mount type=secret,source=ssh_key,target=/root/.ssh/id_rsa \
-    proxylinks-container-image \
-    bash main.bash
+# Globals:
+#   SSH_PRIVATE_KEY_PATH
+# Arguments:
+#   None
+# Outputs:
+# 	Success if the secret exists at the 
+#   specified path, error otherwise
+#######################################
+function check_secret_existence() {
+    if [[ -z "$SSH_PRIVATE_KEY_PATH" ]]; then
+        log_error "Error, empty secret path detected" 1
+        exit 1
+    fi
 
+    # if [[ ! -f "$SSH_PRIVATE_KEY_PATH" ]]; then
+    #     log_error "Error, secret not found at specified path" 2
+    #     exit 2
+    # fi
 
+    return 0;
+}
+
+# Create the builder container
+avoid_repeated_builds "$DOCKER_BUILDER_NAME"
+sudo docker buildx create --name "$DOCKER_BUILDER_NAME"
+
+check_secret_existence "$SSH_PRIVATE_KEY_PATH" #TODO solve the path problem
+cat "${HOME}/.ssh/tester_azure_server.pem" | sudo docker secret create ssh_key -
+
+sudo docker compose --env-file ./config/.env.dev up
+sudo docker-compose run --rm --entrypoint bash proxylinks-container
