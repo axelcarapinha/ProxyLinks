@@ -1,0 +1,166 @@
+#!/bin/bash
+# Functions for a broad use: from interface to connection and ip location
+
+source configs/config.conf
+
+PROXY_VARS=("port" "host")
+PROXY_PORT_IDX=0
+PROXY_HOST_IDX=1
+
+
+#######################################
+# Creates the terminal emulator window 
+# to see the output from ProxyLinks
+#
+# Globals:
+#   None
+# Arguments:
+#   $1: command to connect to the server
+# Returns:
+# 	Nothing
+#######################################
+function log_error() {
+    local readonly MESSAGE="$1"
+    local readonly VALUE="$2"
+    printf "%s" "$MESSAGE"
+    if [[ -n "$VALUE" ]]; then
+        printf ": %s\n" "$VALUE"
+    else
+        printf "\n"
+    fi
+}
+
+
+
+#######################################
+# Creates the terminal emulator window 
+# to see the output from ProxyLinks
+#
+# Globals:
+#   None
+# Arguments:
+#   $1: command to connect to the server
+# Returns:
+# 	Nothing
+#######################################
+function clear_terminal() { echo -e "$CLEAN_TERMINAL"; } # uses escape sequences to clean it
+
+
+#######################################
+# Creates the terminal emulator window 
+# to see the output from ProxyLinks
+#
+# Globals:
+#   None
+# Arguments:
+#   $1: command to connect to the server
+# Returns:
+# 	Nothing
+#######################################
+function in_docker_container() {
+	# The second command encompasses other types of containers too (LXC, ...)
+	if ls -a / | grep -q ".dockerenv" || grep -q "bash" /proc/1/sched; then
+		[[ $VERBOSE -eq 1 ]] && echo "Container execution detected."
+		return 0
+	fi
+	return 1
+}
+
+
+#######################################
+# Creates the terminal emulator window 
+# to see the output from ProxyLinks
+#
+# Globals:
+#   None
+# Arguments:
+#   $1: command to connect to the server
+# Returns:
+# 	Nothing
+#######################################
+function is_server_up() {
+	local readonly TARGET="$1"
+	local PING_NUM_PACKETS="$2"
+	if ping -c $PING_NUM_PACKETS "$TARGET" &> /dev/null; then
+		[[ VERBOSE -eq 1 ]] && echo "Server is up"
+    	return 0
+	fi
+	return 1
+}
+
+
+#######################################
+# Creates the terminal emulator window 
+# to see the output from ProxyLinks
+#
+# Globals:
+#   None
+# Arguments:
+#   $1: command to connect to the server
+# Returns:
+# 	Nothing
+#######################################
+function create_terminal_tab() {
+	local readonly command="$1"
+
+	local exit_status 
+	if in_docker_container; then
+		"${command}" 
+		exit_status=$? # to avoid capture return value from the if statement
+	elif [[ WINDOW_CREATE -eq 1 ]]; then
+		x-terminal-emulator \
+			--title "$WINDOW_TITLE" \
+			--start-as "$WINDOW_STATE" \
+			--hold \
+			-- sh \
+			-c "$command"
+		exit_status=$? # same reason here as describe above
+	fi 
+
+	if [[ exit_status -ne 0 ]];then
+		log_error "Error creating the interactive terminal window" "$exit_status"
+		return "$exit_status";
+	fi
+
+	return 0;
+}
+
+
+#######################################
+# Prints ip-based location and keeps
+# running in the background 
+# (if the user choosed that)
+#
+# Globals:
+#   GEO_API_URL (return json location data)
+#	NUM_PACKETS (for the ping command)
+#	CYCLE_TIME  (delay between requests)
+# Arguments:
+#   None
+# Outputs:
+# 	Writes location to the create
+# 	terminal emulator tab
+# Returns:
+#	Exit status (0, after the complete execution)
+#######################################
+#TODO on another window
+
+function know_curr_ip_location() {
+	local readonly WANTS_CYCLE="$1"
+
+	if is_server_up "$GEO_API_DOMAIN" "$PING_NUM_PACKETS"; then 
+		local json_data=$(curl -s "$GEO_API_URL")
+		local country=$(echo "$json_data" | jq -r '.country')
+		local region=$( echo "$json_data" | jq -r '.regionName')
+		echo "("$(date +"%T")") Location: $region, $country"
+	else
+		[[ VERBOSE -eq 1 ]] && echo "Server down. Unable to know IP location."
+	fi
+
+	if [[ WANTS_CYCLE -eq 1 ]]; then
+    	sleep "${CYCLE_TIME}"
+    	know_curr_ip_location & 
+	fi
+
+	return 0;
+}

@@ -1,110 +1,78 @@
 #!/bin/bash
+# Interpret user input commands.
 
-#
-# Imports
-#
 source configs/config.conf
-source configs/logger.bash
-#
-source handlers/request_handler.bash
-source request_forwarder.bash
-source handlers/response_handler.bash
-#
-source handlers/error_handler.bash
+source utils_proxy
 
-
-# Function: user_actions
-#
-# Description:
-#   Calls the function respective to the flag (the command)
-#	entered by the user
-#
-# Parameters:
-#   $1: the pretended command (invalid or not)
-#
-# Returns:
-#   boolean (to terminate the execution when the user wants to)
-#
-# Usage:
-#   user_actions --set
-#
-function user_actions() {
-	FLAG=$1
-	case "$FLAG" in 
-		"-s" | "-S" | "--set")
-			set_proxy "$VISUAL_MODE" #TODO check this
-			;;
-		"-v" | "-V" | "--verify")
-			show_proxy_settings #TODO verify if in a container the errors still occur
-			;;
-		"-r" | "-R" | "--reset")
-			reset_proxy_settings $2
-			;;
-		"-h" | "-H" | "--help")
-			explain_script
-			;;
-		"-c" | "-C" | "--curiosity")
-			output_curiosity
-			;;
-		"^L" | "--clear")
-			clear_terminal
-			;;
-		"l" | "--location")
-			know_curr_ip_location 
-			;;
-		"e" | "--exit")
-			# return 1
-			;;
-		*)	
-			echo "Invalid flag. Please, try again."
-			;;
-	esac
-
-	# return 0
+function output_curiosity() {
+	echo "The term \"proxy\" originated from the Latin word \"proximus\", meaning \"next\"." 
 }
 
-#
-# Main
-#
-function main() {
-	#
-	# Terminate child processes (of know_curr_ip_location) when this script ends
-	# 
-	trap 'kill $(jobs -p)' EXIT 
+function explain_script() {
+	printf "Flags: \n"
+	printf "\t '-s' or '--set'    (...the proxy) \n"
+	printf "\t '-v' or '--verify' (...current state) \n"
+	printf "\t '-r' or '--reset'  (...to default state) \n"
+	printf "\t '-e' or '--exit'   (...the proxy) \n"
+	printf "\n"
+	printf "\t '-h' or '--help'\n"
+	printf "\t '-c' or '--curiosity' \n"
+	printf "\t 'Ctrl-L' or 'clear' to clean CLI's view"
+	printf "\n"
+	printf "\t 'Ctrl-C' to finish the execution. \n"
+}
 
-	#
-	# Execution
-	#
-	local user_input=$1 
+#TODO consider an array for this
+function parse_input_commands() {
+	local readonly FLAG=$1
+	local readonly CONFIRMATION=$2 # a -y flag to skip questions and allow execution
+
+	case "$FLAG" in 
+		"-s" | "-S" | "--set")    proxy_start ;;
+		"-v" | "-V" | "--verify") proxy_verify_settings ;;
+		"-r" | "-R" | "--reset")  proxy_reset "$CONFIRMATION" ;;
+		"-l" | "--location")      know_curr_ip_location ${CYCLE_TIME} ;; 
+		"-h" | "-H" | "--help")   explain_script ;;
+		"-c" | "-C" | "--curiosity") output_curiosity ;;
+		"^L" | "--clear") clear_terminal ;;
+		*) echo "Invalid flag. Please, try again." ;;
+	esac
+
+	return 0
+}
+
+
+function main() { 
+	trap '[[ $VERBOSE -eq 1 ]] && kill $(jobs -p) > /dev/null 2>&1' EXIT
+	trap '[[ $VERBOSE -eq 1 ]] && reset_proxy_settings; exit 1' SIGINT
+
+	# Prepare a graceful termination (all jobs and settings back to normal)
+	trap 'kill $(jobs -p)' EXIT 
+	trap 'proxy_reset; exit 1' SIGINT 
+
+	local user_input="$1" 
 	if [[ -z $user_input ]]; then
-		echo "Enter '-h' if you want to know the available commands"
+		[[ VERBOSE -eq 1 ]] && echo "Enter '-h' if you want to know the available commands\n Ctrl-C to terminate"
 	fi
-	#
-	# user_wants_continue=0
-	# while [[ $user_wants_continue -eq 0 ]]; do
-	while true; do
+
+	# Start the proxy 
+	proxy_start
+	local readonly WANT_CYCLE=1
+	know_curr_ip_location "$WANT_CYCLE" 
+
+	# Listen for more commands
+	while true; do 
 		if [[ -z $user_input ]]; then
 			read -p "command:  " user_input  
-
-			# Handle the case where the user 
-			# comments out this variable in config.conf
-			if [[ -v CLEAN_TERMINAL ]]; then
-				clear_terminal
-			fi
 		else
-			# user_wants_continue=$(user_actions "$user_input")
-			# echo "$user_wants_continue"
-			user_actions "$user_input"
+			parse_input_commands "$user_input"
 			unset user_input
 		fi
 	done
 
-	#
-	# Gracefully finish the execution
-	#
-	#TODO consider more security options
-	reset_proxy_settings
-	echo "Execution finished successfully"
+	return 0;
 }
-#
-main "$@" 
+main "$@"
+
+
+#TODO colors for errors and interface
