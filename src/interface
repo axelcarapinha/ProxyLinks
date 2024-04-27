@@ -1,0 +1,82 @@
+#!/bin/bash
+# CLI interface for the user
+
+source configs/config.conf
+
+
+#######################################
+# Outputs a curiosity for the user
+#
+# Globals:
+#   None
+# Arguments:
+#   None
+# Outputs:
+# 	Lexical origin curiosity
+#######################################
+function output_curiosity() {
+	echo "The term \"proxy\" originated from the Latin word \"proximus\", meaning \"next\"." 
+}
+
+
+#######################################
+# Show the available commands specified
+# on the soure file
+#
+# Globals:
+#   None
+# Arguments:
+#   None
+# Outputs:
+# 	File with commands
+#######################################
+function explain_script() {
+	cat "$AVAILABLE_CMDS_PATH"
+    printf "\n"
+}
+
+
+#######################################
+# Show ASCII title art
+#
+# Globals:
+#   None
+# Arguments:
+#   None
+# Outputs:
+# 	File with title ASCII art
+#######################################
+function output_title() {
+	cat "$ASCII_ART_PATH"
+	printf "\n"
+}
+
+
+#######################################
+# Execute desired user action
+#
+# Globals:
+#   CYCLE_TIME (delay between location calculations)
+# Arguments:
+#   FLAG (user command)
+#   CONFIRMATION (flag to avoid questions and execute the command)
+# Returns:
+# 	Exit code
+#######################################
+function parse_input_commands() { #TODO consider an array for this
+	local readonly FLAG=$1
+	local readonly CONFIRMATION=$2 # a -y flag to skip questions and allow execution
+
+	case "$FLAG" in 
+		"-s" | "-S" | "--start")    proxy_start ;;
+		"-v" | "-V" | "--verify")   proxy_verify_settings ;;
+		"-r" | "-R" | "--reset")    proxy_reset "$CONFIRMATION" ;;
+		"-l" | "--location")        know_curr_ip_location ${CYCLE_TIME} ;; 
+		"-h" | "-H" | "--help")     explain_script ;;
+		"-c" | "-C" | "--curiosity") output_curiosity ;;
+		"^L" | "--clear") clear_terminal ;;
+		*) echo "Invalid flag. Please, try again." ;;
+	esac
+
+	return 0
+}

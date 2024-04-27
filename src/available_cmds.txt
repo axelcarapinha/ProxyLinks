@@ -1,0 +1,8 @@
+Flags:
+    '-s' or '--start'  (...the proxy) 
+    '-v' or '--verify' (...current state) 
+    '-r' or '--reset'  (...to default state) 
+    
+    '-h' or '--help'
+    '-c' or '--curiosity' 
+    'Ctrl-C' to finish the execution. 

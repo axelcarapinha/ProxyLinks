@@ -5,44 +5,57 @@ source utils_general
 
 #######################################
 # ENABLE system proxy settings 
-# considering the config.conf 
-# (in case the settings are OFF)
+# and establish SOCKS SSH proxy connetuon
+# with the server
 #
 # Globals:
-#   PORT (of the )
-#	HOST
+#   VERBOSE (flag for verbose mode)
+#	HOST_IP (loopback address to access the proxy)
+#	HOST_PORT (port of the loopback address)
+#	PROXY_VARS (proxy properties use for the code logic)
+#	PROXY_PORT_IDX (index of the loopback address on the PROXY_VARS array)
+#	SSH_PRIVATE_KEY_PATH
+#	SERVER_USERNAME (for the proxy server)
+#	SERVER_IP (or the proxy server hostname)
+# 	SSH_WINDOW (interactive separate window for simultaneous server use)
+# Arguments:
+#	None
 # Returns:
-# 	Exit status 
+# 	Exit status
 #######################################
 function proxy_start() {
-	[[ VERBOSE -eq 1 ]] && echo "Setting..."
+	[[ VERBOSE -eq 1 ]] && echo "Setting proxy..."
 
-	# Allow the settings
-	if ((in_docker_container || SESSION_ONLY_PROXY == 1)); then
-		export HTTP_PROXY=socks5://"$HOST":"$PORT"
-		export HTTPS_PROXY=socks5://"$HOST":"$PORT"
+	# ENABLE proxy in the system settings
+	if ((in_container)); then
+		export HTTP_PROXY=socks5://"$HOST_IP":"$HOST_PORT"
+		export HTTPS_PROXY=socks5://"$HOST_IP":"$HOST_PORT"
 	else 
 		gsettings set org.gnome.system.proxy mode 'manual';
-		gsettings set org.gnome.system.proxy.socks ${PROXY_VARS[$PROXY_PORT_IDX]} $PORT 
-		gsettings set org.gnome.system.proxy.socks ${PROXY_VARS[$PROXY_HOST_IDX]} $HOST
+		gsettings set org.gnome.system.proxy.socks \
+			${PROXY_VARS[$PROXY_PORT_IDX]} "$HOST_PORT" 
+		gsettings set org.gnome.system.proxy.socks \ 
+			${PROXY_VARS[$PROXY_HOST_IDX]} "$HOST_IP"
 	fi 
 
 	local readonly settings_status=$?
 	if [[ "$settings_status" -ne 0 ]]; then
-		log_error "Error changing the settings at proxy start"
+		log_error "Error changing the settings at proxy start" "$settings_status"
 		return "$settings_status"
 	fi
 
-	#TODO fix this
-	# SOCK ssh connection for encrypted traffic 
-	ssh -i "$SSH_PRIVATE_KEY_PATH" \
-    -o "ProxyCommand=nc -X connect -x $HOST_IP:$HOST_PORT %h %p" \
-    "$SERVER_USERNAME@$SERVER_IP"
-
-	# ssh -i "$SSH_PRIVATE_KEY_PATH" -D "$HOST_PORT" -C -q -N "$SERVER_USERNAME"@"$SERVER_IP" 
+	# Establish the SSH tunnel
+	# (can be simplified IF the credentials are in the ~/.ssh/config)
+	local command="ssh -i $SSH_PRIVATE_KEY_PATH -D $HOST_PORT"
+	if [ "$INTERACTIVE_SSH" -eq 0 ]; then
+    	command+=" -N"
+	fi
+	command+=" -C $SERVER_USERNAME@$SERVER_IP"
+	create_terminal_tab "$command"
+	
 	local readonly ssh_status=$?
 	if [[ "$ssh_status" -ne 0 ]]; then
-		log_error "Error when connecting via SSH to the proxy server"
+		log_error "Error when connecting via SSH to the proxy server" "$ssh_status"
 		return "$ssh_status"
 	fi
 
@@ -51,10 +64,11 @@ function proxy_start() {
 
 
 #######################################
-# Disable system / session proxy settings
+# Disable system proxy settings
 #
 # Globals:
-#   None
+#   VERBOSE (verbose flag)
+# Env V
 # Arguments:
 #	Confirmation for the reset settings option
 # Returns:
@@ -62,24 +76,25 @@ function proxy_start() {
 #######################################
 function proxy_reset() {
 
-	exec_reset() { # execute the reset operation itself
+	exec_reset() { # the reset operation itself
 		[[ VERBOSE -eq 1 ]] && echo "Resetting proxy settings..."
-		if ((in_docker_container || SESSION_ONLY_PROXY == 1)); then
+		if ((in_container)); then
 			unset HTTP_PROXY
 			unset HTTPS_PROXY
 		else 
-        	change_status=$(gsettings set org.gnome.system.proxy mode 'none'); 
-			return "$change_status"
+			gsettings set org.gnome.system.proxy mode 'none'; 
+			return $?
 		fi 
     }
 
-	local user_wants_reset=${1:-"-n"}
+	local user_wants_reset=${1:-"-y"} # use "-n" to ask for a previous confirmation
     if [[ "$user_wants_reset" =~ -[yY] ]]; then
         exec_reset
     else 
         read -p $'\n'"Are you sure? [y/n] " answer
         if [[ "$answer" =~ [yY] ]]; then    
-			local reset_status=$(exec_reset)
+			exec_reset
+			local readonly reset_status=$?
             if [[ reset_status -ne 0 ]]; then
 				log_error "Error reseting the proxy settings." "$reset_status"
 			fi
@@ -94,22 +109,25 @@ function proxy_reset() {
 
 #######################################
 # Prompts the current proxy settings of
-# the gnome environment
+# the system (or the environment, in the)
+# container case
 #
 # Globals:
-#   None
+#	HOST_IP (loopback address to access the proxy)
+#	HOST_PORT (port of the loopback address)
+#	PROXY_VARS (proxy properties use for the code logic)
+#
 # Arguments:
 # 	None	
-# Returns:
-#	true if the connection succeeded 
-#   false otherwise
+# Outputs:
+#	(System or container environment) proxy settings
 #######################################
 function proxy_verify_settings() {
 	[[ VERBOSE -eq 1 ]] && echo "Verifying..."
 
-	if [[ in_docker_container || SESSION_ONLY_PROXY -eq 1 ]]; then
-		echo HTTP_PROXY=socks5://"$HOST":"$PORT"
-		echo HTTPS_PROXY=socks5://"$HOST":"$PORT"
+	if [[ in_container || SESSION_ONLY_PROXY -eq 1 ]]; then
+		echo HTTP_PROXY=socks5://"$HOST_IP":"$HOST_PORT"
+		echo HTTPS_PROXY=socks5://"$HOST_IP":"$HOST_PORT"
 	else 
 		for property in "${PROXY_VARS[@]}"; do
 			echo " $property = $(gsettings get org.gnome.system.proxy.socks "$property")"
