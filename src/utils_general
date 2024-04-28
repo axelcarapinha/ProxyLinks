@@ -1,7 +1,7 @@
 #!/bin/bash
 # Functions for a broad use: from interface to connection and ip location
 
-source configs/config.conf
+source ../configs/config.conf
 
 PROXY_VARS=("port" "host")
 PROXY_PORT_IDX=0
@@ -106,7 +106,7 @@ function create_terminal_tab() {
 	local readonly command="$1"
 
 	local exit_status 
-	if ((in_container)); then
+	if in_container; then
 		"$command" 
 		exit_status=$? # to avoid capture return value from the if statement
 	elif [[ WINDOW_CREATE -eq 1 ]]; then
@@ -152,6 +152,8 @@ function know_curr_ip_location() { #TODO on another window, with create tab
 		local country=$(echo "$json_data" | jq -r '.country')
 		local region=$( echo "$json_data" | jq -r '.regionName')
 		printf "\n"
+
+		# UTC time
 		echo "("$(date +"%T")") Location: $region, $country"
 	else
 		[[ VERBOSE -eq 1 ]] && echo "Server down. Unable to know IP location."

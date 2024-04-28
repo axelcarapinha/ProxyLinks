@@ -1,5 +1,5 @@
 #!/bin/bash
-# Creates a container to use ProxyLinks
+# Creates the container to use ProxyLinks
 
 source configs/config.conf
 source src/utils_general
@@ -29,39 +29,14 @@ function avoid_repeated_builds() {
     fi
 }
 
-
-#TODO######################################
-# Checks the existence of the secret
-# before passing to Docker compose
-#
-# Globals:
-#   SSH_PRIVATE_KEY_PATH
-# Arguments:
-#   None
-# Outputs:
-# 	Success if the secret exists at the 
-#   specified path, error otherwise
-#######################################
-function check_secret_existence() {
-    if [[ -z "$SSH_PRIVATE_KEY_PATH" ]]; then
-        log_error "Error, empty secret path detected" 1
-        exit 1
-    fi
-
-    # if [[ ! -f "$SSH_PRIVATE_KEY_PATH" ]]; then
-    #     log_error "Error, secret not found at specified path" 2
-    #     exit 2
-    # fi
-
-    return 0;
-}
-
 # Create the builder container
 avoid_repeated_builds "$DOCKER_BUILDER_NAME"
 sudo docker buildx create --name "$DOCKER_BUILDER_NAME"
+sudo docker buildx use "$DOCKER_BUILDER_NAME"
+sudo docker buildx build --platform linux/amd64 -t "$DOCKER_IMAGE_NAME":latest --load .
 
-check_secret_existence "$SSH_PRIVATE_KEY_PATH" #TODO solve the path problem
-cat "${HOME}/.ssh/tester_azure_server.pem" | sudo docker secret create ssh_key -
+if [[ -z "$SSH_AUTH_SOCK" ]]; then
+    log_error "SSH agent is not running" -1
+fi
 
-sudo docker compose --env-file ./config/.env.dev up
-sudo docker-compose run --rm --entrypoint bash proxylinks-container
+sudo docker run -v /ssh-agent:/ssh-agent -e SSH_AUTH_SOCK=/ssh-agent "$DOCKER_IMAGE_NAME"

@@ -27,7 +27,7 @@ function proxy_start() {
 	[[ VERBOSE -eq 1 ]] && echo "Setting proxy..."
 
 	# ENABLE proxy in the system settings
-	if ((in_container)); then
+	if in_container; then
 		export HTTP_PROXY=socks5://"$HOST_IP":"$HOST_PORT"
 		export HTTPS_PROXY=socks5://"$HOST_IP":"$HOST_PORT"
 	else 
@@ -46,12 +46,21 @@ function proxy_start() {
 
 	# Establish the SSH tunnel
 	# (can be simplified IF the credentials are in the ~/.ssh/config)
-	local command="ssh -i $SSH_PRIVATE_KEY_PATH -D $HOST_PORT"
+	local command="ssh "
+	if [ in_container -ne 0 ]; then
+		command+=" -i "$SSH_PRIVATE_KEY_PATH""
+	fi
+	command+=" -D "$HOST_PORT""
 	if [ "$INTERACTIVE_SSH" -eq 0 ]; then
     	command+=" -N"
 	fi
-	command+=" -C $SERVER_USERNAME@$SERVER_IP"
-	create_terminal_tab "$command"
+	command+=" -C "$SERVER_USERNAME"@"$SERVER_IP""
+
+	if [ in_container -ne 0 ]; then
+		create_terminal_tab "$command"
+	else
+		echo -c "$command"
+	fi
 	
 	local readonly ssh_status=$?
 	if [[ "$ssh_status" -ne 0 ]]; then
@@ -78,7 +87,7 @@ function proxy_reset() {
 
 	exec_reset() { # the reset operation itself
 		[[ VERBOSE -eq 1 ]] && echo "Resetting proxy settings..."
-		if ((in_container)); then
+		if in_container; then
 			unset HTTP_PROXY
 			unset HTTPS_PROXY
 		else 

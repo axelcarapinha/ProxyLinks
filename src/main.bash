@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source configs/config.conf
+source ../configs/config.conf
 source interface
 source utils_proxy
 
