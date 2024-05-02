@@ -1,4 +1,5 @@
 # ProxyLinks
+⚠️ In development, some features may not work.
 Bash script to use a server as a proxy.
 
 <!-- TABLE OF CONTENTS -->
@@ -23,7 +24,7 @@ Bash script to use a server as a proxy.
 
 <!-- ABOUT THE PROJECT -->
 ## About the project
-A bash script done for _learning purposes_ with an encrypted proxy connection as the main goal.  
+A bash script done for _learning purposes_ with an ssh (encrypted) proxy connection as the main goal.  
 Allows to know the current location based on IP in a cyclic way and ease the manipulation of settings for Linux systems, mainly.
 
 <!-- HOW TO START IT -->
@@ -43,13 +44,7 @@ sudo apt install bash # for ubuntu systems
 ```
 
 ### Installation and usage
-1. Pull the code, and enter _Proxylinks_ folder
-2. Enter the docker folder `cd docker` and config the .conf file accordingly
-3. Create an image based on the Dockerfile
-```sh
-chmod +x manage_docker_image.bash
-bash manage_docker_image.bash
-```
+⚠️ Because of implementation changes, this section will remain empty until a working version.
 Sidenote: I aim to upload a docker image to dockerhub for an easier setup
 
 ## Results
@@ -61,6 +56,7 @@ Had fun knowing more about:
   * Basic concepts (loops, conditionals, ...)
   * Variable expansion
   * Bash parallel processing
+  * Some secure coding practices
 * General
   * Background processes
 * Docker
@@ -69,6 +65,7 @@ Had fun knowing more about:
   * buildx
   * registries
   * SSH agents and mounting volumes at runtime
+  * layers
 
 
 
