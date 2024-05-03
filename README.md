@@ -66,6 +66,7 @@ Had fun knowing more about:
   * registries
   * SSH agents and mounting volumes at runtime
   * layers
+  * privilege good practices
 
 
 

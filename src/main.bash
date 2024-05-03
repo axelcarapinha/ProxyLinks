@@ -1,4 +1,5 @@
 #!/bin/bash
+# Starts the interface, interpretates user commands and cleans when finished
 
 source ../configs/config.conf
 source interface
@@ -23,7 +24,7 @@ function main() {
 	local readonly WANT_CYCLE=1
 	know_curr_ip_location "$WANT_CYCLE" # use the cycle value from configs.conf
 
-	# Listen for more commands
+	# Listen for more commands (until Ctrl-C is used by the user)
 	while true; do 
 		if [[ -z $user_input ]]; then
 			read -p "command:  " user_input  

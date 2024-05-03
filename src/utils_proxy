@@ -46,20 +46,16 @@ function proxy_start() {
 
 	# Establish the SSH tunnel
 	# (can be simplified IF the credentials are in the ~/.ssh/config)
-	local command="ssh "
-	if [ in_container -ne 0 ]; then
-		command+=" -i "$SSH_PRIVATE_KEY_PATH""
-	fi
-	command+=" -D "$HOST_PORT""
+	local command="ssh -D "$HOST_PORT" "
 	if [ "$INTERACTIVE_SSH" -eq 0 ]; then
     	command+=" -N"
 	fi
 	command+=" -C "$SERVER_USERNAME"@"$SERVER_IP""
 
-	if [ in_container -ne 0 ]; then
+	if [ "$(in_container)" -ne 0 ]; then
 		create_terminal_tab "$command"
 	else
-		echo -c "$command"
+		eval "$command"
 	fi
 	
 	local readonly ssh_status=$?
@@ -69,6 +65,9 @@ function proxy_start() {
 	fi
 
 	return 0;
+
+	#TODO
+	ssh heyAserver@4.232.129.17 2>&1 | tee /proxy_links_logs
 }
 
 
@@ -86,7 +85,7 @@ function proxy_start() {
 function proxy_reset() {
 
 	exec_reset() { # the reset operation itself
-		[[ VERBOSE -eq 1 ]] && echo "Resetting proxy settings..."
+		[[ VERBOSE -eq 1 ]] && printf "\nResetting proxy settings...\n"
 		if in_container; then
 			unset HTTP_PROXY
 			unset HTTPS_PROXY

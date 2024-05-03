@@ -17,7 +17,7 @@ source src/utils_general
 # 	Nothing in case there is no conflict,
 #   interface to solve the problem otherwise
 #######################################
-function avoid_repeated_builds() {
+function avoid_repeated_buildx_builds() {
     local readonly TARGET_CONTAINER="$1"
     if sudo docker buildx ls | grep -q "$TARGET_CONTAINER"; then
         echo "There's already a container with that name"
@@ -29,14 +29,53 @@ function avoid_repeated_builds() {
     fi
 }
 
-# Create the builder container
-avoid_repeated_builds "$DOCKER_BUILDER_NAME"
+#######################################
+# Adds the key to the ssh agent
+#
+# Globals:
+#   VERBOSE (flag for the verbose mode)
+# Arguments:
+#   None
+# Returns:
+# 	Exit status
+#######################################
+function prepare_ssh_agent() {
+    # Check if the SSH agent is running
+    if [ -z "$SSH_AUTH_SOCK" ]; then
+        [[ VERBOSE -eq 1 ]] && echo "SSH agent is not running"
+        ssh-agent -s
+    fi
+
+    # Add the key to the SSH agent
+    if ! ssh-add -l | grep -q "$SSH_PRIVATE_KEY_PATH"; then
+        ssh-add "$SSH_PRIVATE_KEY_PATH"
+
+        local exit_status=$?
+        if [[ "$exit_status" -ne 0 ]];then
+		    log_error "Error adding the ssh key to the ssh agent" "$exit_status"
+		return "$exit_status";
+    fi 
+
+    [[ VERBOSE -eq 1 ]] && echo "SSH private key added to the SSH system's agent."
+    return 0;
+}
+
+avoid_repeated_buildx_builds "$DOCKER_BUILDER_NAME"
 sudo docker buildx create --name "$DOCKER_BUILDER_NAME"
 sudo docker buildx use "$DOCKER_BUILDER_NAME"
-sudo docker buildx build --platform linux/amd64 -t "$DOCKER_IMAGE_NAME":latest --load .
 
-if [[ -z "$SSH_AUTH_SOCK" ]]; then
-    log_error "SSH agent is not running" -1
-fi
+prepare_ssh_agent
+sudo docker buildx b \
+    --platform linux/amd64 \
+    --ssh default=$SSH_AUTH_SOCK \
+    -f Dockerfile \
+    -t "$DOCKER_IMAGE_NAME" \
+    --load .
+# SSH here too to allow for setup with private repos, for example
 
-sudo docker run -v /ssh-agent:/ssh-agent -e SSH_AUTH_SOCK=/ssh-agent "$DOCKER_IMAGE_NAME"
+sudo docker run \
+    -it \
+    -v $SSH_AUTH_SOCK:/ssh-agent \
+    -e SSH_AUTH_SOCK=/ssh-agent "$DOCKER_IMAGE_NAME"
+
+#TODO name the version in the first "release"

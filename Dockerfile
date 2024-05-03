@@ -13,20 +13,25 @@ RUN apk update && \
     openssh-client \
     openssh-server \
     xterm \
-    dbus-x11
-# openssh-server too in case the container is used in proxy chains
-    
-# Copy the needed code
+    dbus-x11 \
+    coreutils 
+# openssh-server (possible use for P2P)
+# coreutils -> for the tee command
+
+# Establish appropriate permissions
+
+
+# Copy source code
 WORKDIR /app/proxylinks/
 RUN mkdir -p src configs
 COPY src/* ./src/
 COPY configs/* ./configs/
+#TODO NOT baking the configs in the image
 
-# Enter in the main folder
-WORKDIR /app/proxylinks/src
-
-# Enable SSH connections (use other port for improved security)
+# For a possible use for P2P
 EXPOSE 22 
 
-RUN chmod +x main.bash
-ENTRYPOINT ["sh", "-c", "/app/proxylinks/src/main.bash --start"]
+# In case the dev uses permissions in this file
+# RUN chmod +x main.bash
+
+# ENTRYPOINT ["sh", "-c", "/app/proxylinks/src/main.bash --start"]

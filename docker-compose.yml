@@ -1,0 +1,17 @@
+# version: '3.8'
+
+services:
+  proxylinks-builder: # builder defined as a service
+    image: alpine:3.19
+    working_dir: /app/proxylinks/src
+    command: ["bash", "main.bash"]
+    secrets:
+      - ssh_key
+    volumes:
+      - ./src:/app/proxylinks/src
+    ports:
+      - "22" 
+
+secrets:
+  ssh_key:
+    external: true
