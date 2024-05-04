@@ -63,6 +63,7 @@ Had fun knowing more about:
   * Some secure coding practices
 * General
   * Background processes
+  * Snap packages
 * Docker
   * runc Daemon and runtimes
   * images
@@ -73,6 +74,14 @@ Had fun knowing more about:
   * privilege good practices
   * build context
   * Relation between ENTRYPOINT, CMD and Docker run
+* Python virtual envs
+* Web scrapping
+  * Selenium
+  * Regulations
+* Browsers
+  * Drivers
+  * Rendering Engine and Layout engine
+  * PAC (Proxy Auto-Configuration)
 * Server maintenance (starting)
   * Activity and login attempts logs
 
