@@ -9,9 +9,9 @@ if [[ -z $(which geckodriver) ]]; then
     tar xvfz geckodriver*.tar.gz
     chmod +x geckodriver
     sudo mv geckodriver /usr/local/bin
-    export PATH=$PATH:/usr/local/bin/geckodriver
-    # ln -s /usr/local/bin geckodriver
 fi
+# ln -s /usr/local/bin geckodriver
+export PATH=$PATH:/usr/local/bin/geckodriver
 
 # Python virtual environment
 if [[ "$IS_VENV" -eq 1 ]]; then
@@ -27,7 +27,7 @@ if [[ "$IS_VENV" -eq 1 ]]; then
 fi
 
 pip3 install -r requirements.txt
-python3 browser.py # Prepare Firefox settings
+python3 browser.py # Prepare Firefox proxy settings
 
 # FINAL part
 cd ..
