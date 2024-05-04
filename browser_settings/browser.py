@@ -16,7 +16,6 @@ profile = webdriver.FirefoxProfile()
 
 options.headless = True	
 set_proxy_with_option(options, profile, SYSTEM_PROXY)	
-options.headless = False 
 
 # Apply and quit
 driver = webdriver.Firefox(options=options)

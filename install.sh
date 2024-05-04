@@ -11,13 +11,13 @@ if [[ -z $(which geckodriver) ]]; then
     sudo mv geckodriver /usr/local/bin
 fi
 # ln -s /usr/local/bin geckodriver
-export PATH=$PATH:/usr/local/bin/geckodriver
 
 # Python virtual environment
 if [[ "$IS_VENV" -eq 1 ]]; then
     echo "Using a python virtual environment for python dependencies..."
     python3 -m venv $PWD 
     source ./bin/activate
+    export PATH=$PATH:/usr/local/bin/geckodriver
     # ./bin/python3 --version 
 
     if [[ -z "$VIRTUAL_ENV" ]]; then
@@ -28,6 +28,7 @@ fi
 
 pip3 install -r requirements.txt
 python3 browser.py # Prepare Firefox proxy settings
+deactivate
 
 # FINAL part
 cd ..
