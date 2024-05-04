@@ -17,7 +17,7 @@ RUN apk update && \
     xterm 
 # openssh-server (possible use for P2P)
 # coreutils -> for the tee command
-# apk does already deal with removing the cache 
+# apk does already deal with removing the cache
 
 # For a possible use for P2P
 EXPOSE 22 

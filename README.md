@@ -21,35 +21,40 @@ Bash script to use a server as a proxy or ssh from a container safely.
   </ol>
 </details>
 
-<!-- ABOUT THE PROJECT -->
 ## About the project
 A bash script done for _learning purposes_ with an ssh (encrypted) proxy connection as the main goal.  
 Allows to know the current location based on IP in a cyclic way and ease the manipulation of settings for Linux systems, mainly.
 
-<!-- HOW TO START IT -->
-## Getting started
-### Prerequisites
-1. Linux system
-2. <a href="https://docs.docker.com/engine/install/">Docker engine</a>
-3. Make sure docker buildx comes installed with the docker engine
+## Getting started 
+- Linux based distro
+- Python3 3.10.12 (for Firefox settings change)
+- <a href="https://docs.docker.com/engine/install/">Docker engine</a> (for the containerized SSH)
+- Bash 
+
+```zsh
+# 
+git clone git@github.com:axelcarapinha/ProxyLinks.git
+cd PROXYLINKS
+chmod +x install.sh
+sudo apt update && sudo apt upgrade
+bash install.sh
+```
+Consider <a href="https://github.com/mozilla/geckodriver/releases">Geckodriver</a>'s latest release, change the url in the script to ease the installation, if you want to.
+
+### Proxy server
+```zsh
+make
+```
+### Containerized SSH to custom server
+1. Make sure docker buildx comes installed with the docker engine
 ```sh
 docker buildx version # to check the installation
 sudo apt update
-sudo apt install docker-buildx # if it was not installed (example for ubuntu)
+sudo apt install docker-buildx # if it was not installed (example for apt)
 ```
-3. If bash does not come pre-installed, use your predefined package-manager to install it
-```sh
-sudo apt install bash # for ubuntu systems
-```
-### Installation and usage
-⚠️ The steps need to be simplified with more automations:
-(1) Firefox -> Settings -> Proxy -> Use System Settings
-(2) close this repo
-(3) make main.bash and docker_init.bash executable
-(4.1) make c (container mode to ssh, if INTERACTIVE_SSH == 1 )
-(4.2) make n (normal mode)
-
-Sidenotes: I aim to upload a docker image to dockerhub for an easier setup
+2. INTERACTIVE_SSH=1 (on proxylinks/configs/config.conf)
+3. Customize _docker\_init.bash_ and _Dockerfile_ ("Use the source, Luke!")
+4. `make container`
 
 ## Results
 ⚠️ Not recorded yet
@@ -64,6 +69,8 @@ Had fun knowing more about:
 * General
   * Background processes
   * Snap packages
+  * Direct and Transitive dependencies
+  * Python virtual envs
 * Docker
   * runc Daemon and runtimes
   * images
@@ -74,7 +81,6 @@ Had fun knowing more about:
   * privilege good practices
   * build context
   * Relation between ENTRYPOINT, CMD and Docker run
-* Python virtual envs
 * Web scrapping
   * Selenium
   * Regulations

@@ -1,35 +1,41 @@
 #!/bin/bash
-# Prepare the script environment
+# Prepare the script's environment
 
-# Because of a problem running Firefox from a container
-# 0.34.0 (2024-01-03, c44f0d09630a) 
-source proxylinks/src/utils_general 
+source proxylinks/configs/config.conf
 
-# Preparing the venv
-python3 -m venv . # I wanted in this folder
-source ./bin/activate
-./bin/python3 --version # for the venv version
-echo "$VIRTUAL_ENV"
+# Prepare 'Geckodriver'
+cd browser_settings
+if [[ -z $(which geckodriver) ]]; then
+    wget -O geckodriver-v0.34.0-linux64.tar.gz https://github.com/mozilla/geckodriver/releases/
+    tar xvfz geckodriver-v0.34.0-linux64.tar.gz
+    rm geckodriver-v0.34.0-linux64.tar.gz
+    chmod +x geckodriver
+    sudo mv geckodriver /usr/local/bin
+    export PATH=$PATH:/usr/local/bin/geckodriver
+    # ln -s /usr/local/bin geckodriver
+fi
 
-# Installing dependencies
-pip3 install selenium
-# sudo mv geckodriver /usr/local/bin
-# sudo mv geckodriver /snap/bin/geckodriver
+# Python virtual environment
+if [[ "$IS_VENV" -eq 1 ]]; then
+    echo "Using a python virtual environment for python dependencies..."
+    python3 -m venv . 
+    source ./bin/activate
+    # ./bin/python3 --version 
 
-# If geckodriver is REMOVED from the /usr/local/bin folder
-ln -s /usr/local/bin geckodriver
+    if [[ -z "$VIRTUAL_ENV" ]]; then
+        log_error "Error setting the virtual environment."
+        return -1;
+    fi
+fi
+pip3 install -r requirements.txt
 
-export TMPDIR=$HOME/tmp geckodriver
+# Prepare Firefox settings
+cd browser_settings
+python3 browser.py
+cd ..
 
-chmod +x geckdriver
-
-# If not working
-export PATH=$PATH:/usr/local/bin/geckodriver
-
-
-# Preparing to run the script
-chmod u+x Docker/docker_init.bash src/main.bash
-chmod u+rw proxylinks.log
+# FINAL part
+chmod u+x proxylinks/docker_init.bash proxylinks/src/main.bash
 
 
 

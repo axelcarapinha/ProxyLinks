@@ -42,6 +42,14 @@ sudo docker buildx b \
     --load .
 # SSH here too to allow for setup with private repos, for example
 
+#! Uncomment to save the image (and use)
+# sudo docker tag "$DOCKER_IMAGE_NAME":latest axelcarapinha/proxylinks:"$DOCKER_VERSION"
+# sudo docker login
+# sudo docker push axelcarapinha/proxylinks:"$DOCKER_VERSION"
+#
+# sudo docker save -o "$DOCKER_TAR_NAME"-"$DOCKER_TAR_VERSION".tar "$DOCKER_IMAGE_NAME"
+# mv "$DOCKER_TAR_NAME"-"$DOCKER_TAR_VERSION".tar ~/Desktop/
+
 sudo docker run \
     -it \
     -v $SSH_AUTH_SOCK:/ssh-agent \

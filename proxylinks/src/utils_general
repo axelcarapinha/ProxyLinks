@@ -179,7 +179,7 @@ function create_terminal_tab() {
 # Returns:
 #	Exit status (0, after the complete execution)
 #######################################
-#! curl does NOT use the proxy, 
+#! Works, but curl does NOT use the proxy, 
 #! it needs that the TCP traffic is forced, like with proxychains
 function know_curr_ip_location() {
 	local readonly WANTS_CYCLE="$1"
