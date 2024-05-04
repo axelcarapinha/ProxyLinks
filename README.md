@@ -12,7 +12,7 @@ Bash script to use a server as a proxy or ssh from a container safely.
       <a href="#getting-started">Getting Started</a>
       <ul>
         <li><a href="#proxy-server">Proxy server</a></li>
-        <li><a href="#containerized-ssh-to-server">Containerized SSH to serverContainerized SSH to server</a></li>
+        <li><a href="#containerized-ssh-to-server">Containerized SSH to server</a></li>
       </ul>
     </li>
     <li><a href="#results">Results</a></li>
