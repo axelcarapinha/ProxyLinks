@@ -15,6 +15,7 @@ Bash script to use a server as a proxy or ssh from a container safely.
         <li><a href="#containerized-ssh-to-server">Containerized SSH to server</a></li>
       </ul>
     </li>
+    <li><a href="#folder-structure">Folder Structure</a></li>
     <li><a href="#results">Results</a></li>
     <li><a href="#what-i-learned-until-now">What I learned until now!</a></li>
   </ol>
@@ -61,8 +62,33 @@ sudo apt install docker-buildx # if it was not installed (example for apt)
 3. Customize _docker\_init.bash_ and _Dockerfile_ ("Use the source, Luke!")
 4. `make container`
 
+## Folder Structure
+```sh
+.
+├── browser_settings
+│   ├── browser.py
+│   └── requirements.txt
+├── install.sh
+├── Makefile
+├── proxylinks
+│   ├── configs
+│   │   └── config.conf
+│   ├── Dockerfile
+│   ├── docker_init.bash
+│   └── src
+│       ├── ascii_art.txt
+│       ├── available_cmds.txt
+│       ├── interface
+│       ├── main.bash
+│       ├── utils_general
+│       └── utils_proxy
+└── README.md
+```
+
+
 ## Results
 ⚠️ Not recorded yet
+
 
 ## What I learned until now!
 Had fun knowing more about:
