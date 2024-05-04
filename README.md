@@ -41,13 +41,18 @@ sudo apt install docker-buildx # if it was not installed (example for ubuntu)
 ```sh
 sudo apt install bash # for ubuntu systems
 ```
-
 ### Installation and usage
-⚠️ Because of implementation changes, this section will remain empty until a working version.
-Sidenote: I aim to upload a docker image to dockerhub for an easier setup
+⚠️ The steps need to be simplified with more automations:
+(1) Firefox -> Settings -> Proxy -> Use System Settings
+(2) close this repo
+(3) make main.bash and docker_init.bash executable
+(4.1) make c (container mode to ssh, if INTERACTIVE_SSH == 1 )
+(4.2) make n (normal mode)
+
+Sidenotes: I aim to upload a docker image to dockerhub for an easier setup
 
 ## Results
-
+⚠️ Not recorded yet
 
 ## What I learned until now!
 Had fun knowing more about:
@@ -68,6 +73,8 @@ Had fun knowing more about:
   * privilege good practices
   * build context
   * Relation between ENTRYPOINT, CMD and Docker run
+* Server maintenance (starting)
+  * Activity and login attempts logs
 
 
 
