@@ -5,8 +5,7 @@ container:
 	bash docker_init.bash
 
 normal:
-	cd proxylinks
-	bash src/main.bash
+	cd proxylinks && bash src/main.bash
 
 
 

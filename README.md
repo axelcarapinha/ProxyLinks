@@ -30,20 +30,23 @@ Allows to know the current location based on IP in a cyclic way and ease the man
 - Python3 3.10.12 (for Firefox settings change)
 - <a href="https://docs.docker.com/engine/install/">Docker engine</a> (for the containerized SSH)
 - Bash 
+- Firefox (not the snap package)
   
-1.
+1. Get the script
 ```zsh
 git clone git@github.com:axelcarapinha/ProxyLinks.git
 cd PROXYLINKS
 ```
-2. <a href="https://github.com/mozilla/geckodriver/releases">Geckodriver</a>'s latest release
-3. Place the download file on the _browser\_settings_ folder
-4. Let the magic happen! 
+1. <a href="https://github.com/mozilla/geckodriver/releases">Geckodriver</a>'s latest release
+2. Place the download file on the _browser\_settings_ folder
+3. Let the magic happen! 
 ```zsh
 chmod +x install.sh
 sudo apt update && sudo apt upgrade
 bash install.sh
 ```
+4. `chmod 600 private_key.pem # ensure adequate privileges are granted` 
+
 
 ### Proxy server
 ```zsh
