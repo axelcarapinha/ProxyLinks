@@ -1,11 +1,46 @@
 #!/bin/bash
 # Functions for a broad use: from interface to connection and ip location
 
-source ../configs/config.conf
+source configs/config.conf
 
 PROXY_VARS=("port" "host")
 PROXY_PORT_IDX=0
 PROXY_HOST_IDX=1
+
+
+#######################################
+# Adds the key to the ssh agent
+#
+# Globals:
+#   VERBOSE (flag for the verbose mode)
+# Arguments:
+#   None
+# Returns:
+# 	Exit status
+#######################################
+function prepare_ssh_agent() {
+
+    # Check if the SSH agent is running
+    if [ -z "$SSH_AUTH_SOCK" ]; then
+        [[ VERBOSE -eq 1 ]] && echo "SSH agent is not running"
+        ssh-agent -s
+    fi
+
+    # Add the key to the SSH agent
+    if ! ssh-add -l | grep -q "$SSH_PRIVATE_KEY_PATH"; then
+        ssh-add "$SSH_PRIVATE_KEY_PATH"
+
+        local exit_status=$?
+        if [[ "$exit_status" -ne 0 ]];then
+		    log_error "Error adding the ssh key to the ssh agent" "$exit_status"
+			return "$exit_status"
+        fi
+		return "$exit_status";
+    fi 
+
+    [[ VERBOSE -eq 1 ]] && echo "SSH private key added to the SSH system's agent."
+    return 0;
+}
 
 
 #######################################
@@ -84,7 +119,7 @@ function is_server_up() {
 	local readonly TARGET="$1"
 	local PING_NUM_PACKETS="$2"
 	if ping -c $PING_NUM_PACKETS "$TARGET" &> /dev/null; then
-		[[ VERBOSE -eq 1 ]] && echo "Server is up"
+		[[ VERBOSE -eq 1 ]] && printf "\nServer is up"
     	return 0
 	fi
 	return 1
@@ -96,7 +131,7 @@ function is_server_up() {
 # to see the output from ProxyLinks
 #
 # Globals:
-#   None
+#   WINDOW_CREATE (execute ssh on another window)
 # Arguments:
 #   $1: command to connect to the server
 # Returns:
@@ -107,9 +142,9 @@ function create_terminal_tab() {
 
 	local exit_status 
 	if in_container; then
-		"$command" 
+		$(command)
 		exit_status=$? # to avoid capture return value from the if statement
-	elif [[ WINDOW_CREATE -eq 1 ]]; then
+	elif [[ "$WINDOW_CREATE" -eq 1 ]]; then
 		x-terminal-emulator \
 			--title "$WINDOW_TITLE" \
 			--start-as "$WINDOW_STATE" \
@@ -118,7 +153,7 @@ function create_terminal_tab() {
 		exit_status=$? # same reason here as describe above
 	fi 
 
-	if [[ exit_status -ne 0 ]];then
+	if [[ "$exit_status" -ne 0 ]];then
 		log_error "Error creating the interactive terminal window" "$exit_status"
 		return "$exit_status";
 	fi
@@ -144,7 +179,9 @@ function create_terminal_tab() {
 # Returns:
 #	Exit status (0, after the complete execution)
 #######################################
-function know_curr_ip_location() { #TODO on another window, with create tab
+#! curl does NOT use the proxy, 
+#! it needs that the TCP traffic is forced, like with proxychains
+function know_curr_ip_location() {
 	local readonly WANTS_CYCLE="$1"
 
 	if is_server_up "$GEO_API_DOMAIN" "$PING_NUM_PACKETS"; then 

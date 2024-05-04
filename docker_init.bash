@@ -1,5 +1,5 @@
 #!/bin/bash
-# Creates the container to use ProxyLinks
+# Sets up the Docker container for ProxyLinks
 
 source configs/config.conf
 source src/utils_general
@@ -29,37 +29,6 @@ function avoid_repeated_buildx_builds() {
     fi
 }
 
-#######################################
-# Adds the key to the ssh agent
-#
-# Globals:
-#   VERBOSE (flag for the verbose mode)
-# Arguments:
-#   None
-# Returns:
-# 	Exit status
-#######################################
-function prepare_ssh_agent() {
-    # Check if the SSH agent is running
-    if [ -z "$SSH_AUTH_SOCK" ]; then
-        [[ VERBOSE -eq 1 ]] && echo "SSH agent is not running"
-        ssh-agent -s
-    fi
-
-    # Add the key to the SSH agent
-    if ! ssh-add -l | grep -q "$SSH_PRIVATE_KEY_PATH"; then
-        ssh-add "$SSH_PRIVATE_KEY_PATH"
-
-        local exit_status=$?
-        if [[ "$exit_status" -ne 0 ]];then
-		    log_error "Error adding the ssh key to the ssh agent" "$exit_status"
-		return "$exit_status";
-    fi 
-
-    [[ VERBOSE -eq 1 ]] && echo "SSH private key added to the SSH system's agent."
-    return 0;
-}
-
 avoid_repeated_buildx_builds "$DOCKER_BUILDER_NAME"
 sudo docker buildx create --name "$DOCKER_BUILDER_NAME"
 sudo docker buildx use "$DOCKER_BUILDER_NAME"
@@ -77,5 +46,3 @@ sudo docker run \
     -it \
     -v $SSH_AUTH_SOCK:/ssh-agent \
     -e SSH_AUTH_SOCK=/ssh-agent "$DOCKER_IMAGE_NAME"
-
-#TODO name the version in the first "release"

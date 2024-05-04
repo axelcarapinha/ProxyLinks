@@ -6,32 +6,28 @@ FROM alpine:3.19
 RUN apk update && \
     apk add --no-cache \
     bash \
-    nano \
+    coreutils \
     curl \
+    dbus-x11 \
     iputils \
     jq \
+    nano \
     openssh-client \
     openssh-server \
-    xterm \
-    dbus-x11 \
-    coreutils 
+    xterm 
 # openssh-server (possible use for P2P)
 # coreutils -> for the tee command
-
-# Establish appropriate permissions
-
-
-# Copy source code
-WORKDIR /app/proxylinks/
-RUN mkdir -p src configs
-COPY src/* ./src/
-COPY configs/* ./configs/
-#TODO NOT baking the configs in the image
+# apk does already deal with removing the cache 
 
 # For a possible use for P2P
 EXPOSE 22 
 
-# In case the dev uses permissions in this file
-# RUN chmod +x main.bash
+# Copy source code
+WORKDIR /app/proxylinks/
+RUN mkdir -p src configs
+COPY src/* /app/proxylinks/src/
+COPY configs/* /app/proxylinks/configs/
+#TODO NOT baking the configs in the image
+#TODO consider multi-stage build
 
-# ENTRYPOINT ["sh", "-c", "/app/proxylinks/src/main.bash --start"]
+ENTRYPOINT ["sh", "-c", "/app/proxylinks/src/main.bash --start"]

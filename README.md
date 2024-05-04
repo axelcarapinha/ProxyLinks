@@ -1,6 +1,5 @@
 # ProxyLinks
-Bash script to use a server as a proxy.
-⚠️ In development, some features may not work.
+Bash script to use a server as a proxy or ssh from a container safely.
 
 <!-- TABLE OF CONTENTS -->
 <details>
@@ -67,6 +66,8 @@ Had fun knowing more about:
   * SSH agents and mounting volumes at runtime
   * layers
   * privilege good practices
+  * build context
+  * Relation between ENTRYPOINT, CMD and Docker run
 
 
 

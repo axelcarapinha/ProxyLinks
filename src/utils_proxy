@@ -1,7 +1,46 @@
 #!/bin/bash
 # Handles proxy settings modification
 
-source utils_general
+source src/utils_general
+
+#######################################
+# Establish the SSH tunnel
+#
+# Globals:
+#   VERBOSE (flag for verbose mode)
+#	HOST_PORT (port of the loopback address)
+#	SERVER_USERNAME (for the proxy server)
+#	SERVER_IP (or the proxy server hostname)
+#	WINDOW_CREATE (execute shh on another window)
+# Arguments:
+#	None
+# Returns:
+# 	Exit status
+#######################################
+function establish_ssh_tunnel() {
+
+	# Can be simplified IF the credentials are in the ~/.ssh/config
+	local command="ssh -D "$HOST_PORT" "
+	if [ "$INTERACTIVE_SSH" -eq 0 ]; then
+    	command+=" -N"
+	fi
+	command+=" -C "$SERVER_USERNAME"@"$SERVER_IP""
+
+	if [ ! "$(in_container)" ] && [ "$WINDOW_CREATE" -eq 1 ]; then
+		create_terminal_tab "$command"
+	else 
+		$command
+	fi
+	
+	local readonly ssh_status=$?
+	if [[ "$ssh_status" -ne 0 ]]; then
+		log_error "Error when connecting via SSH to the proxy server" "$ssh_status"
+		return "$ssh_status"
+	fi
+
+	[[ VERBOSE -eq 1 ]] && echo "SSH tunnel established."
+	return 0;
+}
 
 #######################################
 # ENABLE system proxy settings 
@@ -17,26 +56,30 @@ source utils_general
 #	SSH_PRIVATE_KEY_PATH
 #	SERVER_USERNAME (for the proxy server)
 #	SERVER_IP (or the proxy server hostname)
-# 	SSH_WINDOW (interactive separate window for simultaneous server use)
 # Arguments:
 #	None
 # Returns:
 # 	Exit status
 #######################################
 function proxy_start() {
-	[[ VERBOSE -eq 1 ]] && echo "Setting proxy..."
 
 	# ENABLE proxy in the system settings
 	if in_container; then
 		export HTTP_PROXY=socks5://"$HOST_IP":"$HOST_PORT"
 		export HTTPS_PROXY=socks5://"$HOST_IP":"$HOST_PORT"
-	else 
-		gsettings set org.gnome.system.proxy mode 'manual';
+	else
+		gsettings set org.gnome.system.proxy mode 'manual'
 		gsettings set org.gnome.system.proxy.socks \
-			${PROXY_VARS[$PROXY_PORT_IDX]} "$HOST_PORT" 
-		gsettings set org.gnome.system.proxy.socks \ 
-			${PROXY_VARS[$PROXY_HOST_IDX]} "$HOST_IP"
-	fi 
+			"${PROXY_VARS["$PROXY_PORT_IDX"]}" "$HOST_PORT" 
+		gsettings set org.gnome.system.proxy.socks \
+			"${PROXY_VARS["$PROXY_HOST_IDX"]}" "$HOST_IP"
+		
+		local readonly settings_status=$?
+		if [[ "$settings_status" -ne 0 ]]; then
+			log_error "Error changing proxy settings for the Gnome Environment." "$ssh_status"
+		return "$ssh_status"
+		fi
+	fi
 
 	local readonly settings_status=$?
 	if [[ "$settings_status" -ne 0 ]]; then
@@ -44,30 +87,15 @@ function proxy_start() {
 		return "$settings_status"
 	fi
 
-	# Establish the SSH tunnel
-	# (can be simplified IF the credentials are in the ~/.ssh/config)
-	local command="ssh -D "$HOST_PORT" "
-	if [ "$INTERACTIVE_SSH" -eq 0 ]; then
-    	command+=" -N"
-	fi
-	command+=" -C "$SERVER_USERNAME"@"$SERVER_IP""
-
-	if [ "$(in_container)" -ne 0 ]; then
-		create_terminal_tab "$command"
-	else
-		eval "$command"
-	fi
-	
-	local readonly ssh_status=$?
-	if [[ "$ssh_status" -ne 0 ]]; then
-		log_error "Error when connecting via SSH to the proxy server" "$ssh_status"
-		return "$ssh_status"
+	establish_ssh_tunnel
+	local readonly tunneling_status=$?
+	if [[ "$tunneling_status" -ne 0 ]]; then
+		log_error "Error creating the ssh tunnel with the server" "$tunneling_status"
+		return "$tunneling_status"
 	fi
 
+	[[ VERBOSE -eq 1 ]] && echo "Proxy settings set."
 	return 0;
-
-	#TODO
-	ssh heyAserver@4.232.129.17 2>&1 | tee /proxy_links_logs
 }
 
 
@@ -85,13 +113,16 @@ function proxy_start() {
 function proxy_reset() {
 
 	exec_reset() { # the reset operation itself
-		[[ VERBOSE -eq 1 ]] && printf "\nResetting proxy settings...\n"
 		if in_container; then
 			unset HTTP_PROXY
 			unset HTTPS_PROXY
 		else 
-			gsettings set org.gnome.system.proxy mode 'none'; 
-			return $?
+			gsettings set org.gnome.system.proxy mode 'none'
+			local readonly settings_status=$?
+			if [[ "$settings_status" -ne 0 ]]; then
+				log_error "Error changing proxy settings for the Gnome Environment." "$settings_status"
+			fi
+			return "$settings_status"
 		fi 
     }
 
@@ -105,12 +136,14 @@ function proxy_reset() {
 			local readonly reset_status=$?
             if [[ reset_status -ne 0 ]]; then
 				log_error "Error reseting the proxy settings." "$reset_status"
+				return "$reset_status"
 			fi
         else
 			[[ VERBOSE -eq 1 ]] && echo "Did NOT reset the proxy settings." 
 		fi
     fi
 
+	[[ VERBOSE -eq 1 ]] && printf "Proxy settings reset.\n"
 	return 0;
 }
 

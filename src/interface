@@ -1,8 +1,10 @@
 #!/bin/bash
-# CLI interface for the user
+# Simple CLI interface for the user
 
-source ../configs/config.conf
+source configs/config.conf
 
+BLUE='\033[0;34m'
+RESET='\033[0m'         
 
 #######################################
 # Outputs a curiosity for the user
