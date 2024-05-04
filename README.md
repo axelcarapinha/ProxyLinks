@@ -35,7 +35,7 @@ Allows to know the current location based on IP in a cyclic way and ease the man
 1. Get the script
 ```zsh
 git clone git@github.com:axelcarapinha/ProxyLinks.git
-cd PROXYLINKS
+cd ProxyLinks
 ```
 1. <a href="https://github.com/mozilla/geckodriver/releases">Geckodriver</a>'s latest release
 2. Place the download file on the _browser\_settings_ folder
