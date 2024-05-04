@@ -11,13 +11,12 @@ Bash script to use a server as a proxy or ssh from a container safely.
     <li>
       <a href="#getting-started">Getting Started</a>
       <ul>
-        <li><a href="#prerequisites">Prerequisites</a></li>
-        <li><a href="#installation">Installation</a></li>
+        <li><a href="#prerequisites">Proxy server</a></li>
+        <li><a href="#installation">Container -> SSH -> server</a></li>
       </ul>
     </li>
-    <li><a href="#usage">Usage</a></li>
     <li><a href="#results">Results</a></li>
-    <li><a href="#what-i-learned">What I learned!</a></li>
+    <li><a href="#what-i-learned">What I learned until now!</a></li>
   </ol>
 </details>
 
@@ -51,7 +50,7 @@ bash install.sh
 ```zsh
 make
 ```
-### Containerized SSH to custom server
+### Container -> SSH -> server
 1. Make sure docker buildx comes installed with the docker engine
 ```sh
 docker buildx version # to check the installation
