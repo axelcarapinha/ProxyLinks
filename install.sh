@@ -6,9 +6,7 @@ source proxylinks/configs/config.conf
 # Prepare 'Geckodriver'
 cd browser_settings
 if [[ -z $(which geckodriver) ]]; then
-    wget -O geckodriver-v0.34.0-linux64.tar.gz https://github.com/mozilla/geckodriver/releases/
-    tar xvfz geckodriver-v0.34.0-linux64.tar.gz
-    rm geckodriver-v0.34.0-linux64.tar.gz
+    tar xvfz geckodriver*.tar.gz
     chmod +x geckodriver
     sudo mv geckodriver /usr/local/bin
     export PATH=$PATH:/usr/local/bin/geckodriver
@@ -18,7 +16,7 @@ fi
 # Python virtual environment
 if [[ "$IS_VENV" -eq 1 ]]; then
     echo "Using a python virtual environment for python dependencies..."
-    python3 -m venv . 
+    python3 -m venv $PWD 
     source ./bin/activate
     # ./bin/python3 --version 
 
@@ -27,16 +25,10 @@ if [[ "$IS_VENV" -eq 1 ]]; then
         return -1;
     fi
 fi
-pip3 install -r requirements.txt
 
-# Prepare Firefox settings
-cd browser_settings
-python3 browser.py
-cd ..
+pip3 install -r requirements.txt
+python3 browser.py # Prepare Firefox settings
 
 # FINAL part
+cd ..
 chmod u+x proxylinks/docker_init.bash proxylinks/src/main.bash
-
-
-
-
