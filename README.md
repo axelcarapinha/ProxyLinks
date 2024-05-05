@@ -22,15 +22,15 @@ Bash script to use a server as a proxy or ssh from a container safely.
 </details>
 
 ## About the project
-A bash script done for _learning purposes_ with an ssh (encrypted) proxy connection as the main goal.  
-Allows to know the current location based on IP in a cyclic way and ease the manipulation of settings for Linux systems, mainly.
+A bash script to use your own server as a proxy, with virtualized dependencies for an automated and privacy-focused Firefox browsing.
+Can also be used to automate SSH from a Docker container safely, without exposing SSH private keys.
 
 ## Getting started (6 steps OR 1 alias)
-- Linux based distro
-- Python3 3.10.12 (for Firefox settings change)
+- Linux based distro (tested on Ubuntu)
+- Firefox, but NOT the snap package (<a href="https://github.com/mozilla/geckodriver/releases">0.34.0 "Startup hang with Firefox running in a container (e.g. snap, flatpak):"</a>)
+- Python3 3.10.12 (for Firefox settings customization)
 - <a href="https://docs.docker.com/engine/install/">Docker engine</a> (for the containerized SSH)
 - Bash 
-- Firefox, but NOT the snap package (<a href="https://github.com/mozilla/geckodriver/releases">0.34.0 "Startup hang with Firefox running in a container (e.g. snap, flatpak):"</a>)
   
 1. Get the script
 ```zsh
@@ -93,7 +93,7 @@ sudo apt install docker-buildx # if it was not installed (example for apt)
 ```
 
 ## Results
-Recorded, only need to edit the video.
+Tested and recorded, I only need to edit the video.
 
 ## What I learned until now!
 Had fun knowing more about:
