@@ -40,9 +40,9 @@ git clone https://github.com/axelcarapinha/ProxyLinks.git && cd ProxyLinks
 3. Place the download file on the _browser\_settings_ folder
 4. Prepare the environment (use the opened window to browse with the proxy)
 ```zsh
-chmod +x prepare.sh
+chmod +x prepare.bash
 sudo apt update && sudo apt upgrade
-bash prepare.sh
+bash prepare.bash
 ```
 5. `chmod 600 private_key.pem # ensure adequate privileges are granted` 
 6. Place the path for the private key on the config file (command _realpath_ is recommended to know it)
