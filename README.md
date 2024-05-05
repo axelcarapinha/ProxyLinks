@@ -25,26 +25,32 @@ Bash script to use a server as a proxy or ssh from a container safely.
 A bash script done for _learning purposes_ with an ssh (encrypted) proxy connection as the main goal.  
 Allows to know the current location based on IP in a cyclic way and ease the manipulation of settings for Linux systems, mainly.
 
-## Getting started 
+## Getting started (6 steps OR 1 alias)
 - Linux based distro
 - Python3 3.10.12 (for Firefox settings change)
 - <a href="https://docs.docker.com/engine/install/">Docker engine</a> (for the containerized SSH)
 - Bash 
-- Firefox (not the snap package)
+- Firefox, but NOT the snap package (<a href="https://github.com/mozilla/geckodriver/releases">0.34.0 "Startup hang with Firefox running in a container (e.g. snap, flatpak):"</a>)
   
 1. Get the script
 ```zsh
 git clone https://github.com/axelcarapinha/ProxyLinks.git && cd ProxyLinks
 ```
-1. <a href="https://github.com/mozilla/geckodriver/releases">Geckodriver</a>'s latest release
-2. Place the download file on the _browser\_settings_ folder
-3. Let the magic happen! 
+2. <a href="https://github.com/mozilla/geckodriver/releases">Geckodriver</a>'s latest release
+3. Place the download file on the _browser\_settings_ folder
+4. Prepare the environment (use the opened window to browse with the proxy)
 ```zsh
-chmod +x install.sh
+chmod +x prepare.sh
 sudo apt update && sudo apt upgrade
-bash install.sh
+bash prepare.sh
 ```
-4. `chmod 600 private_key.pem # ensure adequate privileges are granted` 
+5. `chmod 600 private_key.pem # ensure adequate privileges are granted` 
+6. Place the path for the private key on the config file (command _realpath_ is recommended to know it)
+
+```sh
+# For an easier daily use
+alias pl="cd /path/to/proxylinks/folder && bash prepare.bash && make"
+```
 
 
 ### Proxy server
@@ -66,22 +72,22 @@ sudo apt install docker-buildx # if it was not installed (example for apt)
 ```sh
 .
 ├── browser_settings
-│   ├── browser.py
-│   └── requirements.txt
+│   ├── browser.py
+│   └── requirements.txt
 ├── install.sh
 ├── Makefile
 ├── proxylinks
-│   ├── configs
-│   │   └── config.conf
-│   ├── Dockerfile
-│   ├── docker_init.bash
-│   └── src
-│       ├── ascii_art.txt
-│       ├── available_cmds.txt
-│       ├── interface
-│       ├── main.bash
-│       ├── utils_general
-│       └── utils_proxy
+│   ├── configs
+│   │   └── config.conf
+│   ├── Dockerfile
+│   ├── docker_init.bash
+│   └── src
+│       ├── ascii_art.txt
+│       ├── available_cmds.txt
+│       ├── interface
+│       ├── main.bash
+│       ├── utils_general
+│       └── utils_proxy
 └── README.md
 ```
 

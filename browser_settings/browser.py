@@ -25,6 +25,7 @@ options.headless = True
 
 # Apply and quit
 driver = webdriver.Firefox(options=options) 
+driver.get("https://whatismyipaddress.com/")
 
 print("Firefox profile with proxy enabled created.")
 
