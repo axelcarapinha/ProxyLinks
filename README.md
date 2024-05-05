@@ -46,12 +46,13 @@ bash prepare.bash
 ```
 5. `chmod 600 private_key.pem # ensure adequate privileges are granted` 
 6. Place the path for the private key on the config file (command _realpath_ is recommended to know it)
-
+7. (optional) For an easier daily use
 ```sh
-# For an easier daily use
+vim ~/.bashrc # or use other editor
+
+# Place this alias where you prefer
 alias pl="cd /path/to/proxylinks/folder && bash prepare.bash && make"
 ```
-
 
 ### Proxy server
 ```zsh
@@ -91,10 +92,8 @@ sudo apt install docker-buildx # if it was not installed (example for apt)
 └── README.md
 ```
 
-
 ## Results
-⚠️ Not recorded yet
-
+Recorded, only need to edit the video.
 
 ## What I learned until now!
 Had fun knowing more about:
@@ -121,6 +120,7 @@ Had fun knowing more about:
 * Web scrapping
   * Selenium
   * Regulations
+  * Browsing profiles and configuration pages
 * Browsers
   * Drivers
   * Rendering Engine and Layout engine
