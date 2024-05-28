@@ -29,16 +29,14 @@ Can also be used to automate SSH from a Docker container safely, without exposin
 ### Pre-requisites
 - Linux based distro (tested on Ubuntu)
 - Gnome desktop environment (the proxy settings can only be changed by using _gsettings_, for now)
-
 - Firefox, but <a href="https://github.com/mozilla/geckodriver/releases">NOT the snap package</a> because of <a href="https://github.com/mozilla/geckodriver/releases">this</a>
-
-
-- Python3 (for Firefox settings customization, tested on Python 3.10.12)
+- Others:
+```sh
+sudo apt install python3 python3-venv
+sudo apt install make
+```
 - <a href="https://docs.docker.com/engine/install/">Docker engine</a> (for the containerized SSH)
-- Bash 
-- make
-- python-venv
-- SSH connection from the host to the target server
+- Capacity to SSH from the host to the server
 
 ### Installation
 1. Get the script:
