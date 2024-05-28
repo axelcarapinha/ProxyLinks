@@ -37,7 +37,6 @@ options.headless = True
 driver = webdriver.Firefox(options=options) 
 driver.get("https://whatismyipaddress.com/")
 
-
 driver.find_element_by_tag_name('body').send_keys(Keys.CONTROL + 't')
 driver.switch_to.window(driver.window_handles[IDX_WORKING_WINDOW])
 

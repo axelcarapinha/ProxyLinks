@@ -26,40 +26,58 @@ A bash script to use your own server as a proxy, with virtualized dependencies f
 Can also be used to automate SSH from a Docker container safely, without exposing SSH private keys.
 
 ## Getting started (6 steps OR 1 alias)
+### Pre-requisites
 - Linux based distro (tested on Ubuntu)
 - Gnome desktop environment (the proxy settings can only be changed by using _gsettings_, for now)
-- Firefox, but NOT the snap package (<a href="https://github.com/mozilla/geckodriver/releases">0.34.0 "Startup hang with Firefox running in a container (e.g. snap, flatpak):"</a>)
-- Python3 3.10.12 (for Firefox settings customization)
+
+- Firefox, but <a href="https://github.com/mozilla/geckodriver/releases">NOT the snap package</a> because of <a href="https://github.com/mozilla/geckodriver/releases">this</a>
+
+
+- Python3 (for Firefox settings customization, tested on Python 3.10.12)
 - <a href="https://docs.docker.com/engine/install/">Docker engine</a> (for the containerized SSH)
 - Bash 
-  
-1. Get the script
+- make
+- python-venv
+- SSH connection from the host to the target server
+
+### Installation
+1. Get the script:
 ```zsh
 git clone https://github.com/axelcarapinha/ProxyLinks.git && cd ProxyLinks
 ```
 2. <a href="https://github.com/mozilla/geckodriver/releases">Geckodriver</a>'s latest release
-3. Place the download file on the _browser\_settings_ folder
-4. Prepare the environment (use the opened window to browse with the proxy)
+3. Prepare geckodriver's tar for use:
+```sh
+mv ~/Downloads/geckodriver*.tar.gz browser_settings
+```
+
+4. Prepare the environment:
 ```zsh
 chmod +x prepare.bash
 sudo apt update && sudo apt upgrade
 bash prepare.bash
 ```
-5. `chmod 600 private_key.pem # ensure adequate privileges are granted` 
-6. Place the path for the private key on the config file (command _realpath_ is recommended to know it)
-7. (optional) For an easier daily use
+### Configuration 
+5. Config absolute path for the private key:
 ```sh
-vim ~/.bashrc # or use other editor
+nano proxylinks/configs/config.conf # to edit the file
+# Recommend to use 'realpath' command for it
+```
 
-# Place this alias where you prefer
+6. (optional) For an easier daily use:
+```sh
+nano ~/.bashrc # or use other editor
+
+# Place the alias anywhere, BUT there's already a section for that
 alias pl="cd /path/to/proxylinks/folder && bash prepare.bash && make"
 ```
 
-### Proxy server
-```zsh
-make
+### Use (Proxy server)
+```sh
+make # Use the opened window to browse with the proxy.
 ```
-### Containerized SSH to server
+
+### Use (Containerized SSH to server)
 1. Make sure docker buildx comes installed with the docker engine
 ```sh
 docker buildx version # to check the installation
@@ -126,13 +144,6 @@ Had fun knowing more about:
   * Drivers
   * Rendering Engine and Layout engine
   * PAC (Proxy Auto-Configuration)
-* Server maintenance (starting)
+* Server maintenance
   * Activity and login attempts logs
-
-
-
-
-
-
-
-
+  * Public and private key management
