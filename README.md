@@ -74,6 +74,7 @@ alias pl="cd /path/to/proxylinks/folder && bash prepare.bash && make"
 
 ### Use (Proxy server)
 ```sh
+bash prepare.bash # if it was NOT in the step 4
 make # Use the opened window to browse with the proxy.
 ```
 
