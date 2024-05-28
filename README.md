@@ -27,6 +27,7 @@ Can also be used to automate SSH from a Docker container safely, without exposin
 
 ## Getting started (6 steps OR 1 alias)
 - Linux based distro (tested on Ubuntu)
+- Gnome desktop environment (the proxy settings can only be changed by using _gsettings_, for now)
 - Firefox, but NOT the snap package (<a href="https://github.com/mozilla/geckodriver/releases">0.34.0 "Startup hang with Firefox running in a container (e.g. snap, flatpak):"</a>)
 - Python3 3.10.12 (for Firefox settings customization)
 - <a href="https://docs.docker.com/engine/install/">Docker engine</a> (for the containerized SSH)
