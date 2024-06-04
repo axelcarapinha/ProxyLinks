@@ -16,7 +16,7 @@ Bash script to use a server as a proxy or ssh from a container safely.
       </ul>
     </li>
     <li><a href="#folder-structure">Folder Structure</a></li>
-    <li><a href="#results">Results</a></li>
+    <li><a href="#video-guide-and-results">Video guide and Results</a></li>
     <li><a href="#what-i-learned-until-now">What I learned until now!</a></li>
   </ol>
 </details>
@@ -110,8 +110,9 @@ sudo apt install docker-buildx # if it was not installed (example for apt)
 └── README.md
 ```
 
-## Results
-Tested and recorded, I only need to edit the video.
+## Video guide and Results
+<a href="https://youtu.be/jHA6hbA2plE">Video guide and results </a>
+
 
 ## What I learned until now!
 Had fun knowing more about:
