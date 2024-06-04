@@ -26,6 +26,8 @@ A bash script to use your own server as a proxy, with virtualized dependencies f
 Can also be used to automate SSH from a Docker container safely, without exposing SSH private keys.
 
 ## Getting started (6 steps OR 1 alias)
+▶️ If installed, click <a href="#video-guide-and-results">HERE</a> for a video demonstration and easy setup! 
+
 ### Pre-requisites
 - Linux based distro (tested on Ubuntu)
 - Gnome desktop environment (the proxy settings can only be changed by using _gsettings_, for now)
